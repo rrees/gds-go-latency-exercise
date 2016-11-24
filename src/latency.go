@@ -3,6 +3,7 @@ package main
 import "fmt"
 import "net/http"
 import "time"
+import "log"
 
 func main() {
   fmt.Println("Hello world")
@@ -13,7 +14,21 @@ func main() {
 }
 
 func defaultLatency(w http.ResponseWriter, r *http.Request) {
-  fmt.Fprintf(w, "Sleeping for 500ms\n")
-  time.Sleep(time.Duration(500) * time.Millisecond)
+  duration := "500ms"
+
+  durationParam := r.FormValue("duration")
+
+  if durationParam != "" {
+    duration = durationParam
+  }
+
+  fmt.Fprintf(w, "Sleeping for %s\n", duration)
+  parsedDuration, error := time.ParseDuration(duration)
+
+  if error != nil {
+    log.Fatal(error)
+  }
+
+  time.Sleep(parsedDuration)
   fmt.Fprintf(w, "Sleep now complete!\n")
 }
